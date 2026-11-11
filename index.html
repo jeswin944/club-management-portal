@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>St.jude college's club portal</title>
+  <style>
+    :root{
+      --bg1:#eef2ff;
+      --bg2:#e0f2fe;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --primary:#2563eb;
+      --primary-600:#1d4ed8;
+      --admin:#38bdf8;
+      --student:#34d399;
+      --ring: rgba(37,99,235,0.4);
+      --border:#e2e8f0;
+      --shadow: 0 10px 30px rgba(2,6,23,0.08);
+    }
+    * { box-sizing: border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 20% 0%, var(--bg1), transparent 60%),
+                  radial-gradient(1200px 600px at 80% 100%, var(--bg2), transparent 60%),
+                  linear-gradient(180deg, #ffffff, #f8fafc);
+    }
+    .card{
+      width:min(92vw, 980px);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:28px;
+      display:grid;
+      gap:22px;
+    }
+    header h1{
+      margin:0;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing:.3px;
+    }
+    header p{
+      margin:6px 0 0;
+      color:var(--muted);
+    }
+    .grid{ display:grid; gap:16px; }
+    @media (min-width: 721px){
+      .grid.two { grid-template-columns: 1fr 1fr; }
+      .grid.events { grid-template-columns: 1.2fr .8fr; }
+      .grid.members { grid-template-columns: 1fr 1fr; }
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      font-weight:600;
+      padding:14px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:.15s ease;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      box-shadow:0 2px 0 rgba(15,23,42,.04);
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow:0 8px 22px rgba(2,6,23,0.08); }
+    .btn:focus{ outline:3px solid var(--ring); outline-offset:2px; }
+    .btn.admin{ border-color:#bae6fd; color:#0b4a6f; }
+    .btn.student{ border-color:#bbf7d0; color:#065f46; }
+    .btn.primary{ background:var(--primary); color:white; border-color:transparent; }
+    .btn.primary:hover{ background:var(--primary-600); }
+    .btn.ghost{ background:#f8fafc; border-color:#e2e8f0; width:auto; padding:10px 16px; }
+    .btn.ghost.active{ outline:2px solid var(--primary); outline-offset:2px; }
+    .btn.danger{ background:#ef4444; color:#fff; border-color:transparent; width:auto; padding:8px 12px; }
+    .btn.danger:hover{ background:#dc2626; }
+    .btn.small{ width:auto; padding:8px 12px; }
+
+    .divider{ height:1px; background:var(--border); margin:10px 0; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .panel header{ display:flex; align-items:center; gap:10px; justify-content:space-between; }
+
+    .back, .logout{
+      background:transparent; border:none; color:var(--muted); cursor:pointer; font-weight:600;
+      padding:8px 10px; border-radius:10px;
+    }
+    .back:hover, .logout:hover{ background:#f1f5f9; }
+
+    h2{ margin:6px 0 0; }
+    h3{ margin:0 0 8px; }
+    .muted{ color:var(--muted); font-size:.95rem; }
+
+    form{ display:grid; gap:14px; margin-top:12px; }
+    .field{ display:grid; gap:6px; }
+    label{ font-size:.95rem; color:#0b1220; }
+    input[type="text"], input[type="password"], input[type="datetime-local"], textarea, select{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:1rem;
+      background:#fff;
+    }
+    textarea{ min-height:120px; resize:vertical; }
+    input:focus, textarea:focus, select:focus{ outline:2px solid var(--ring); border-color: var(--primary); }
+
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      background:#f1f5f9; color:#0f172a; border-radius:999px; padding:6px 10px; font-size:.83rem;
+    }
+
+    .notice{
+      margin-top:10px; background:#f8fafc; border:1px dashed #cbd5e1; padding:10px 12px; border-radius:10px;
+      display:none;
+    }
+    .notice.show { display:block; }
+    .notice.success{ border-color:#86efac; background:#ecfdf5; color:#065f46; }
+    .notice.error{ border-color:#fecaca; background:#fef2f2; color:#991b1b; }
+
+    /* Lists */
+    .list{ margin-top:12px; display:grid; gap:10px; }
+    .card-small{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff; }
+    .item-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .item-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* Announcement slider (Student interface) */
+    .slider{ position:relative; overflow:hidden; border:1px solid var(--border); border-radius:12px; background:#fff; }
+    .slides{ display:flex; transition: transform .6s ease; }
+    .slide{ flex: 0 0 100%; padding:14px; }
+    .dots{ display:flex; gap:6px; justify-content:center; margin-top:8px; }
+    .dot{ width:8px; height:8px; border-radius:999px; background:#cbd5e1; }
+    .dot.active{ background:#2563eb; }
+
+    .hidden{ display:none !important; }
+    footer{ text-align:center; color:var(--muted); font-size:.88rem; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="site-title">
+    <header>
+      <h1 id="site-title"><strong>welcome to the club</strong></h1>
+      <p>St. Jude College's Club Portal • Select a portal to continue</p>
+    </header>
+
+    <!-- Role choice -->
+    <section id="roleSelect" class="grid two" aria-label="Choose login type">
+      <button class="btn admin" id="adminBtn">🛡️ Admin login</button>
+      <button class="btn student" id="studentBtn">🎓 Student login</button>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Login panel -->
+    <section id="loginPanel" class="panel" aria-hidden="true">
+      <header>
+        <span class="pill" id="rolePill">🛡️ Admin</span>
+        <button class="back" id="backBtn">← Back</button>
+      </header>
+
+      <!-- Student action buttons -->
+      <div class="student-actions hidden" id="studentActions" style="display:flex; gap:8px; margin-top:6px;">
+        <button class="btn" id="btnStudentSignUp">Sign up</button>
+        <button class="btn" id="btnStudentSignIn">Sign in</button>
+      </div>
+
+      <h2 id="loginTitle">Admin Login</h2>
+      <p class="muted" id="loginSubtitle">Please enter your credentials to continue.</p>
+
+      <!-- Admin form -->
+      <form id="adminForm" novalidate>
+        <div class="field">
+          <label for="adminUser">Email or Admin Name</label>
+          <input id="adminUser" type="text" autocomplete="username" placeholder="e.g. anirudh@gmail.com">
+        </div>
+        <div class="field">
+          <label for="adminPass">Password</label>
+          <input id="adminPass" type="password" autocomplete="current-password" minlength="6" placeholder="••••••••">
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="adminRemember"> Remember me</label>
+          <a href="#" class="muted" onclick="event.preventDefault()">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn primary">Sign in</button>
+      </form>
+
+      <!-- Student Sign in form -->
+      <form id="studentSignInForm" class="hidden" novalidate>
+        <div class="field">
+          <label for="stuUserIn">Email or ID</label>
+          <input id="stuUserIn" type="text" autocomplete="username" placeholder="e.g. s12345@stjude.edu">
+        </div>
+        <div class="field">
+          <label for="stuPassIn">Password</label>
+          <input id="stuPassIn" type="password" autocomplete="current-password" minlength="6" placeholder="••••••••">
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="stuRemember"> Remember me</label>
+          <a href="#" class="muted" onclick="event.preventDefault()">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn primary">Sign in</button>
+      </form>
+
+      <!-- Student Sign up form -->
+      <form id="studentSignUpForm" class="hidden" novalidate>
+        <div class="field">
+          <label for="stuNameUp">Full name</label>
+          <input id="stuNameUp" type="text" autocomplete="name" placeholder="e.g. Ada Lovelace">
+        </div>
+        <div class="field">
+          <label for="stuUserUp">Email or ID</label>
+          <input id="stuUserUp" type="text" autocomplete="username" placeholder="e.g. s12345@stjude.edu">
+        </div>
+        <div class="field">
+          <label for="stuPassUp">Password</label>
+          <input id="stuPassUp" type="password" autocomplete="new-password" minlength="6" placeholder="••••••••">
+        </div>
+        <div class="field">
+          <label for="stuConfirmUp">Confirm password</label>
+          <input id="stuConfirmUp" type="password" autocomplete="new-password" minlength="6" placeholder="Re-enter password">
+        </div>
+        <div class="field">
+          <label for="stuClubUp">Select club</label>
+          <select id="stuClubUp">
+            <!-- options injected by JS -->
+          </select>
+        </div>
+        <div class="row" style="justify-content:flex-start; gap:8px;">
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="stuTerms"> I agree to the club portal terms
+          </label>
+        </div>
+        <button type="submit" class="btn primary">Create account</button>
+      </form>
+
+      <div id="message" class="notice" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section id="adminDashboard" class="panel" aria-hidden="true">
+      <header>
+        <span class="pill">🛡️ Admin Dashboard</span>
+        <button class="logout" id="logoutBtn">⎋ Logout</button>
+      </header>
+
+      <h2 id="adminClubTitle" style="margin-top:6px;"><strong>Welcome</strong></h2>
+      <p class="muted">You are signed in as <span id="adminName">Admin</span>.</p>
+
+      <div class="dash-actions">
+        <button class="btn ghost active" id="btnDashAnnounce">Announcement</button>
+        <button class="btn ghost" id="btnDashSecond">Update Event</button>
+        <button class="btn ghost" id="btnDashThird">Member List</button>
+      </div>
+
+      <!-- Announcement view -->
+      <div class="view" id="viewAnnounce">
+        <h3>Post an announcement</h3>
+        <form id="announceForm">
+          <textarea id="announceText" placeholder="Write your announcement here..."></textarea>
+          <div class="row" style="margin-top:10px; justify-content:flex-start; gap:10px;">
+            <button type="submit" class="btn primary small">Post announcement</button>
+            <button type="button" class="btn small" id="clearAnnouncements">Clear club announcements</button>
+          </div>
+        </form>
+        <div id="announceMsg" class="notice" role="status" aria-live="polite"></div>
+        <div class="list" id="announcementList"></div>
+      </div>
+
+      <!-- Update Event view -->
+      <div class="view hidden" id="viewEvents">
+        <h3>Update event</h3>
+        <form id="eventForm">
+          <div class="grid two">
+            <div class="field">
+              <label for="eventTitle">Event title</label>
+              <input id="eventTitle" type="text" placeholder="e.g. Hackathon 2025">
+            </div>
+            <div class="field">
+              <label for="eventDateTime">Date & time</label>
+              <input id="eventDateTime" type="datetime-local">
+            </div>
+          </div>
+          <div class="field">
+            <label for="eventLocation">Location</label>
+            <input id="eventLocation" type="text" placeholder="e.g. Main Auditorium">
+          </div>
+          <div class="field">
+            <label for="eventDesc">Details</label>
+            <textarea id="eventDesc" placeholder="Short description, agenda, notes..."></textarea>
+          </div>
+          <div class="row" style="justify-content:flex-start; gap:10px;">
+            <button type="submit" class="btn primary small" id="eventSubmit">Save event</button>
+            <button type="button" class="btn small hidden" id="eventCancel">Cancel edit</button>
+          </div>
+        </form>
+        <div id="eventMsg" class="notice" role="status" aria-live="polite"></div>
+        <div class="list" id="eventList"></div>
+      </div>
+
+      <!-- Member List view -->
+      <div class="view hidden" id="viewMembers">
+        <h3>Member list</h3>
+        <form id="memberForm">
+          <div class="grid two">
+            <div class="field">
+              <label for="memberName">Member name</label>
+              <input id="memberName" type="text" placeholder="e.g. Ada Lovelace">
+            </div>
+            <div class="field">
+              <label for="memberId">Student ID or Email</label>
+              <input id="memberId" type="text" placeholder="e.g. s12345">
+            </div>
+          </div>
+          <div class="row" style="justify-content:flex-start; gap:10px;">
+            <button type="submit" class="btn primary small">Add member</button>
+          </div>
+        </form>
+        <div id="memberMsg" class="notice" role="status" aria-live="polite"></div>
+        <div class="list" id="memberList"></div>
+      </div>
+    </section>
+
+    <!-- Student Dashboard (club-scoped) -->
+    <section id="studentDashboard" class="panel" aria-hidden="true">
+      <header>
+        <span class="pill">🎓 Student</span>
+        <button class="logout" id="studentLogoutBtn">⎋ Logout</button>
+      </header>
+
+      <h2 id="studentClubTitle" style="margin-top:6px;"><strong>Welcome</strong></h2>
+      <p class="muted">Logged in as <span id="studentName">Student</span>.</p>
+
+      <div class="grid events">
+        <div>
+          <h3>Announcements</h3>
+          <div class="slider" id="announceSlider">
+            <div class="slides" id="announceSlides"></div>
+          </div>
+          <div class="dots" id="announceDots"></div>
+        </div>
+        <div>
+          <h3>Events</h3>
+          <div id="studentEvents" class="list"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <h3>Members</h3>
+        <div id="studentMembers" class="list"></div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> St.jude club portal
+    </footer>
+  </main>
+
+  <script>
+    // ========= Club and demo data (front-end only) =========
+    const CLUBS = [
+      { id: 1, name: 'sports club', key: 'sports-club', admin: 'Anirudh' },
+      { id: 2, name: 'game club',   key: 'game-club',   admin: 'Gokul'   },
+      { id: 3, name: 'coding club', key: 'coding-club', admin: 'abhi'    },
+      { id: 4, name: 'music club',  key: 'music-club',  admin: 'anu'     },
+      { id: 5, name: 'art club',    key: 'art-club',    admin: 'Alan'    },
+    ];
+
+    const MEMBER_SEEDS = {
+      'sports-club': ['anu','aju','abu','amal','aadhi'],
+      'game-club':   ['Gopu','Golu','bolu','balu','dolu'],
+      'coding-club': ['aji','ali','daiji','baiju','anil'],
+      'music-club':  ['minu','midhu','jinu','manu','janu'],
+      'art-club':    ['balan','jiku','miku','chacku','aromal'],
+    };
+
+    // Admin demo credentials
+    const ADMIN_CREDENTIALS = [
+      { username:'anirudh@gmail.com',      password:'123456', adminName:'Anirudh', clubId:1, clubName:'sports club', clubKey:'sports-club' },
+      { username:'gokul.admin@stjude.edu', password:'852963', adminName:'Gokul',   clubId:2, clubName:'game club',   clubKey:'game-club'   },
+      { username:'abhi.coding@stjude.edu', password:'741258', adminName:'abhi',    clubId:3, clubName:'coding club', clubKey:'coding-club' },
+      { username:'anu.music@stjude.edu',   password:'369258', adminName:'anu',     clubId:4, clubName:'music club',  clubKey:'music-club'  },
+      { username:'alan.art@stjude.edu',    password:'147258', adminName:'Alan',    clubId:5, clubName:'art club',    clubKey:'art-club'    },
+    ];
+
+    function findAdmin(identifier) {
+      const id = keyFor(identifier);
+      return ADMIN_CREDENTIALS.find(r => keyFor(r.username) === id || keyFor(r.adminName) === id) || null;
+    }
+    function toTitleCase(s){
+      return String(s||'').replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+    }
+
+    // ========= Elements =========
+    const roleSelect = document.getElementById('roleSelect');
+    const loginPanel = document.getElementById('loginPanel');
+    const adminDashboard = document.getElementById('adminDashboard');
+    const studentDashboard = document.getElementById('studentDashboard');
+
+    const loginTitle = document.getElementById('loginTitle');
+    const loginSubtitle = document.getElementById('loginSubtitle');
+    const rolePill = document.getElementById('rolePill');
+    const adminBtn = document.getElementById('adminBtn');
+    const studentBtn = document.getElementById('studentBtn');
+    const backBtn = document.getElementById('backBtn');
+    const message = document.getElementById('message');
+    const year = document.getElementById('year');
+
+    // Admin form fields
+    const adminForm = document.getElementById('adminForm');
+    const adminUser = document.getElementById('adminUser');
+    const adminPass = document.getElementById('adminPass');
+    const adminNameEl = document.getElementById('adminName');
+    const adminClubTitle = document.getElementById('adminClubTitle');
+
+    // Student toggles/forms
+    const studentActions = document.getElementById('studentActions');
+    const btnStudentSignIn = document.getElementById('btnStudentSignIn');
+    const btnStudentSignUp = document.getElementById('btnStudentSignUp');
+
+    const studentSignInForm = document.getElementById('studentSignInForm');
+    const stuUserIn = document.getElementById('stuUserIn');
+    const stuPassIn = document.getElementById('stuPassIn');
+    const stuRemember = document.getElementById('stuRemember');
+
+    const studentSignUpForm = document.getElementById('studentSignUpForm');
+    const stuNameUp = document.getElementById('stuNameUp');
+    const stuUserUp = document.getElementById('stuUserUp');
+    const stuPassUp = document.getElementById('stuPassUp');
+    const stuConfirmUp = document.getElementById('stuConfirmUp');
+    const stuClubUp = document.getElementById('stuClubUp');
+    const stuTerms = document.getElementById('stuTerms');
+
+    // Admin dashboard elements
+    const logoutBtn = document.getElementById('logoutBtn');
+    const btnDashAnnounce = document.getElementById('btnDashAnnounce');
+    const btnDashSecond = document.getElementById('btnDashSecond');
+    const btnDashThird = document.getElementById('btnDashThird');
+    const viewAnnounce = document.getElementById('viewAnnounce');
+    const viewEvents = document.getElementById('viewEvents');
+    const viewMembers = document.getElementById('viewMembers');
+
+    // Admin: Announcement
+    const announceForm = document.getElementById('announceForm');
+    const announceText = document.getElementById('announceText');
+    aconstuPassIn = 0; // harmless placeholder to avoid accidental global from previous typo
+    const announceMsg = document.getElementById('announceMsg');
+    const announcementList = document.getElementById('announcementList');
+    const clearAnnouncements = document.getElementById('clearAnnouncements');
+
+    // Admin: Events
+    const eventForm = document.getElementById('eventForm');
+    const eventTitle = document.getElementById('eventTitle');
+    const eventDateTime = document.getElementById('eventDateTime');
+    const eventLocation = document.getElementById('eventLocation');
+    const eventDesc = document.getElementById('eventDesc');
+    const eventMsg = document.getElementById('eventMsg');
+    const eventList = document.getElementById('eventList');
+    const eventCancel = document.getElementById('eventCancel');
+    const eventSubmit = document.getElementById('eventSubmit');
+
+    // Admin: Members
+    const memberForm = document.getElementById('memberForm');
+    const memberName = document.getElementById('memberName');
+    const memberId = document.getElementById('memberId');
+    const memberMsg = document.getElementById('memberMsg');
+    const memberList = document.getElementById('memberList');
+
+    // Student dashboard elements
+    const studentLogoutBtn = document.getElementById('studentLogoutBtn');
+    const studentNameEl = document.getElementById('studentName');
+    const studentClubTitle = document.getElementById('studentClubTitle');
+    const announceSlides = document.getElementById('announceSlides');
+    const announceDots = document.getElementById('announceDots');
+    const studentEvents = document.getElementById('studentEvents');
+    const studentMembers = document.getElementById('studentMembers');
+
+    // Keys
+    const CURRENT_ADMIN_KEY = 'sjc_current_admin';
+    const STUDENT_USERS_KEY = 'sjc_student_users_v2'; // {username:{name,pw,clubKey,createdAt}}
+    const CURRENT_STUDENT_KEY = 'sjc_current_student_v2';
+    const LS_PREFIX = 'sjc';
+
+    const keyForClub = (base, clubKey) => `${LS_PREFIX}:${base}:${clubKey}`;
+    const registrationKey = (clubKey, username) => `${LS_PREFIX}:registrations:${clubKey}:${keyFor(username)}`;
+
+    // State
+    let editingEventId = null;
+    let sliderIndex = 0;
+    let sliderTimer = null;
+    let currentAdmin = null;  // { username, adminName, clubKey, clubName }
+    let currentStudent = null; // { username, name, clubKey, clubName }
+
+    year.textContent = new Date().getFullYear();
+
+    // Helpers
+    function setMessage(el, text, type = 'info'){
+      el.textContent = text;
+      el.classList.remove('success', 'error', 'show');
+      if(type === 'success') el.classList.add('success');
+      if(type === 'error') el.classList.add('error');
+      el.classList.add('show');
+    }
+    function clearMessage(el){
+      el.textContent = '';
+      el.classList.remove('success', 'error', 'show');
+    }
+    function show(el){ el.classList.remove('hidden'); }
+    function hide(el){ el.classList.add('hidden'); }
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' }[s]));
+    }
+    function keyFor(s){ return String(s||'').trim().toLowerCase(); }
+    function genMemberId(clubKey){
+      const prefix = clubKey.substring(0,3).toUpperCase();
+      return `${prefix}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+    }
+
+    // Fill club select options on load
+    (function seedClubSelect(){
+      stuClubUp.innerHTML = '<option value="" disabled selected>Select a club</option>' +
+        CLUBS.map(c => `<option value="${c.key}">${toTitleCase(c.name)}</option>`).join('');
+    })();
+
+    // =========================
+    // Role selection → Login
+    // =========================
+    function showLogin(role){
+      const isAdmin = role.toLowerCase() === 'admin';
+      roleSelect.style.display = 'none';
+      loginPanel.classList.add('active');
+      loginPanel.setAttribute('aria-hidden','false');
+      clearMessage(message);
+
+      if(isAdmin){
+        rolePill.textContent = '🛡️ Admin';
+        loginTitle.textContent = 'Admin Login';
+        loginSubtitle.textContent = 'Admin access — please use your administrator credentials.';
+        adminForm.classList.remove('hidden');
+        studentActions.classList.add('hidden');
+        studentSignInForm.classList.add('hidden');
+        studentSignUpForm.classList.add('hidden');
+        setTimeout(()=> adminUser.focus(), 50);
+      }else{
+        rolePill.textContent = '🎓 Student';
+        loginTitle.textContent = 'Student Access';
+        loginSubtitle.textContent = 'Choose an option below.';
+        adminForm.classList.add('hidden');
+        studentActions.classList.remove('hidden');
+        studentSignInForm.classList.add('hidden');
+        studentSignUpForm.classList.add('hidden');
+      }
+    }
+
+    function backToChoices(){
+      loginPanel.classList.remove('active'); loginPanel.setAttribute('aria-hidden','true');
+      adminDashboard.classList.remove('active'); adminDashboard.setAttribute('aria-hidden','true');
+      studentDashboard.classList.remove('active'); studentDashboard.setAttribute('aria-hidden','true');
+      roleSelect.style.display = 'grid';
+
+      adminForm.reset(); studentSignInForm.reset(); studentSignUpForm.reset(); eventForm.reset(); memberForm.reset();
+      clearMessage(message); clearMessage(announceMsg); clearMessage(eventMsg); clearMessage(memberMsg);
+
+      resetEventForm();
+      stopAnnouncementSlider();
+
+      currentAdmin = null;
+      currentStudent = null;
+      sessionStorage.removeItem(CURRENT_ADMIN_KEY);
+      sessionStorage.removeItem(CURRENT_STUDENT_KEY);
+    }
+
+    // Student mode switch
+    function switchStudentMode(mode){
+      btnStudentSignIn.classList.toggle('active', mode === 'signin');
+      btnStudentSignUp.classList.toggle('active', mode === 'signup');
+
+      clearMessage(message);
+      if(mode === 'signin'){
+        loginTitle.textContent = 'Student Sign In';
+        loginSubtitle.textContent = 'Sign in with your student email or ID.';
+        studentSignInForm.classList.remove('hidden');
+        studentSignUpForm.classList.add('hidden');
+        setTimeout(()=> stuUserIn.focus(), 50);
+      }else{
+        loginTitle.textContent = 'Student Sign Up';
+        loginSubtitle.textContent = 'Create your student account and choose your club.';
+        studentSignUpForm.classList.remove('hidden');
+        studentSignInForm.classList.add('hidden');
+        setTimeout(()=> stuNameUp.focus(), 50);
+      }
+    }
+
+    // =========================
+    // Per-club storage helpers
+    // =========================
+    function getAnnouncementsFor(clubKey){
+      try { return JSON.parse(localStorage.getItem(keyForClub('announcements', clubKey)) || '[]'); }
+      catch { return []; }
+    }
+    function saveAnnouncementsFor(clubKey, list){
+      localStorage.setItem(keyForClub('announcements', clubKey), JSON.stringify(list));
+    }
+
+    function getEventsFor(clubKey){
+      try { return JSON.parse(localStorage.getItem(keyForClub('events', clubKey)) || '[]'); }
+      catch { return []; }
+    }
+    function saveEventsFor(clubKey, arr){
+      localStorage.setItem(keyForClub('events', clubKey), JSON.stringify(arr));
+    }
+
+    function seedMembersForClub(clubKey){
+      const names = MEMBER_SEEDS[clubKey] || [];
+      return names.map((n, i)=>({
+        id: `${clubKey.substring(0,3).toUpperCase()}-${String(i+1).padStart(3,'0')}`,
+        name: toTitleCase(n)
+      }));
+    }
+    function getMembersFor(clubKey){
+      try {
+        const raw = localStorage.getItem(keyForClub('members', clubKey));
+        if(raw) return JSON.parse(raw);
+        const seed = seedMembersForClub(clubKey);
+        localStorage.setItem(keyForClub('members', clubKey), JSON.stringify(seed));
+        return seed;
+      } catch { return []; }
+    }
+    function saveMembersFor(clubKey, arr){
+      localStorage.setItem(keyForClub('members', clubKey), JSON.stringify(arr));
+    }
+
+    // =========================
+    // Student users (auth)
+    // =========================
+    function getStudentUsers(){
+      try { return JSON.parse(localStorage.getItem(STUDENT_USERS_KEY) || '{}'); }
+      catch { return {}; }
+    }
+    function saveStudentUsers(obj){
+      localStorage.setItem(STUDENT_USERS_KEY, JSON.stringify(obj));
+    }
+
+    // =========================
+    // Admin dashboard (club-aware)
+    // =========================
+    function openAdminDashboard(adminInfo){
+      currentAdmin = adminInfo; // { username, adminName, clubKey, clubName }
+      sessionStorage.setItem(CURRENT_ADMIN_KEY, JSON.stringify(adminInfo));
+
+      loginPanel.classList.remove('active'); loginPanel.setAttribute('aria-hidden','true');
+      adminDashboard.classList.add('active'); adminDashboard.setAttribute('aria-hidden','false');
+
+      adminClubTitle.innerHTML = `<strong>Welcome to ${escapeHtml(adminInfo.clubName)}</strong>`;
+      adminNameEl.textContent = adminInfo.adminName || 'Admin';
+
+      switchDashboardView('announce');
+      renderAnnouncements();
+      renderEvents();
+      renderMembers();
+      announceText.value = '';
+      clearMessage(announceMsg);
+    }
+
+    function switchDashboardView(view){
+      btnDashAnnounce.classList.toggle('active', view === 'announce');
+      btnDashSecond.classList.toggle('active', view === 'events');
+      btnDashThird.classList.toggle('active', view === 'members');
+      if(view === 'announce'){ show(viewAnnounce); hide(viewEvents); hide(viewMembers); }
+      else if(view === 'events'){ show(viewEvents); hide(viewAnnounce); hide(viewMembers); }
+      else { show(viewMembers); hide(viewAnnounce); hide(viewEvents); }
+    }
+
+    function logoutAdmin(){
+      sessionStorage.removeItem(CURRENT_ADMIN_KEY);
+      backToChoices();
+    }
+
+    // Admin announcements (club-aware)
+    function renderAnnouncements(){
+      if(!currentAdmin) return;
+      const list = getAnnouncementsFor(currentAdmin.clubKey);
+      announcementList.innerHTML = '';
+      if(list.length === 0){
+        const div = document.createElement('div');
+        div.className = 'card-small';
+        div.textContent = 'No announcements yet.';
+        announcementList.appendChild(div);
+        return;
+      }
+      list.slice().reverse().forEach(a=>{
+        const item = document.createElement('div');
+        item.className = 'card-small';
+        const dt = new Date(a.time);
+        item.innerHTML = `
+          <div class="item-top">
+            <strong>Announcement</strong>
+            <small class="muted">${dt.toLocaleString()}</small>
+          </div>
+          <p style="margin:8px 0 0; white-space:pre-wrap;">${escapeHtml(a.text)}</p>
+        `;
+        announcementList.appendChild(item);
+      });
+    }
+
+    // Admin events
+    function resetEventForm(){
+      eventForm.reset();
+      editingEventId = null;
+      eventSubmit.textContent = 'Save event';
+      hide(eventCancel);
+    }
+    function renderEvents(){
+      if(!currentAdmin) return;
+      const events = getEventsFor(currentAdmin.clubKey).slice().sort((a,b)=> new Date(b.dateTime) - new Date(a.dateTime));
+      eventList.innerHTML = '';
+      if(events.length === 0){
+        const div = document.createElement('div');
+        div.className = 'card-small';
+        div.textContent = 'No events yet.';
+        eventList.appendChild(div);
+        return;
+      }
+      events.forEach(ev=>{
+        const wrap = document.createElement('div');
+        wrap.className = 'card-small';
+        const when = ev.dateTime ? new Date(ev.dateTime).toLocaleString() : '—';
+        wrap.innerHTML = `
+          <div class="item-top">
+            <strong>${escapeHtml(ev.title)}</strong>
+            <small class="muted">${when}</small>
+          </div>
+          <p class="muted" style="margin:6px 0 0;"><strong>Location:</strong> ${escapeHtml(ev.location || 'TBA')}</p>
+          ${ev.desc ? `<p style="margin:6px 0 0; white-space:pre-wrap;">${escapeHtml(ev.desc)}</p>` : ''}
+          <div class="item-actions" style="margin-top:10px;">
+            <button class="btn small" data-action="editEvent" data-id="${ev.id}">Edit</button>
+            <button class="btn danger" data-action="deleteEvent" data-id="${ev.id}">Delete</button>
+          </div>
+        `;
+        eventList.appendChild(wrap);
+      });
+    }
+    function upsertEvent(e){
+      e.preventDefault();
+      if(!currentAdmin) return;
+      const title = (eventTitle.value || '').trim();
+      const dateTime = eventDateTime.value;
+      const location = (eventLocation.value || '').trim();
+      const desc = (eventDesc.value || '').trim();
+      if(!title) return setMessage(eventMsg, 'Please enter an event title.', 'error');
+      if(!dateTime) return setMessage(eventMsg, 'Please select date & time.', 'error');
+
+      const clubKey = currentAdmin.clubKey;
+      const events = getEventsFor(clubKey);
+      if(editingEventId){
+        const idx = events.findIndex(x => x.id === editingEventId);
+        if(idx !== -1){
+          events[idx] = { ...events[idx], title, dateTime, location, desc, updatedAt: Date.now() };
+          saveEventsFor(clubKey, events);
+          setMessage(eventMsg, 'Event updated.', 'success');
+        }
+      } else {
+        const id = 'ev_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+        events.push({ id, title, dateTime, location, desc, createdAt: Date.now() });
+        saveEventsFor(clubKey, events);
+        setMessage(eventMsg, 'Event saved.', 'success');
+      }
+      renderEvents();
+      resetEventForm();
+    }
+    function onEventListClick(e){
+      if(!currentAdmin) return;
+      const btn = e.target.closest('button[data-action]');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      const clubKey = currentAdmin.clubKey;
+      const events = getEventsFor(clubKey);
+      const idx = events.findIndex(x=> x.id === id);
+      if(idx === -1) return;
+      if(action === 'deleteEvent'){
+        if(confirm('Delete this event?')){
+          events.splice(idx,1);
+          saveEventsFor(clubKey, events);
+          renderEvents();
+          if(editingEventId === id) resetEventForm();
+        }
+      } else if(action === 'editEvent'){
+        const ev = events[idx];
+        editingEventId = ev.id;
+        eventTitle.value = ev.title || '';
+        eventDateTime.value = ev.dateTime || '';
+        eventLocation.value = ev.location || '';
+        eventDesc.value = ev.desc || '';
+        eventSubmit.textContent = 'Update event';
+        show(eventCancel);
+        setTimeout(()=> eventTitle.focus(), 50);
+      }
+    }
+
+    // Admin members
+    function renderMembers(){
+      if(!currentAdmin) return;
+      const members = getMembersFor(currentAdmin.clubKey);
+      memberList.innerHTML = '';
+      if(members.length === 0){
+        const div = document.createElement('div');
+        div.className = 'card-small';
+        div.textContent = 'No members yet.';
+        memberList.appendChild(div);
+        return;
+      }
+      members.forEach((m, i)=>{
+        const item = document.createElement('div');
+        item.className = 'card-small';
+        item.innerHTML = `
+          <div class="item-top">
+            <strong>${escapeHtml(m.name)}</strong>
+            <small class="muted">${escapeHtml(m.id)}</small>
+          </div>
+          <div class="item-actions" style="margin-top:8px;">
+            <button class="btn danger" data-action="deleteMember" data-index="${i}">Delete</button>
+          </div>
+        `;
+        memberList.appendChild(item);
+      });
+    }
+    function onMemberListClick(e){
+      if(!currentAdmin) return;
+      const btn = e.target.closest('button[data-action="deleteMember"]');
+      if(!btn) return;
+      const index = Number(btn.dataset.index);
+      const clubKey = currentAdmin.clubKey;
+      const members = getMembersFor(clubKey);
+      if(index >= 0 && index < members.length){
+        if(confirm('Delete this member?')){
+          members.splice(index,1);
+          saveMembersFor(clubKey, members);
+          renderMembers();
+        }
+      }
+    }
+    function addMember(e){
+      e.preventDefault();
+      if(!currentAdmin) return;
+      const name = (memberName.value || '').trim();
+      const id = (memberId.value || '').trim();
+      if(name.length < 2) return setMessage(memberMsg, 'Enter a valid member name.', 'error');
+      if(!id) return setMessage(memberMsg, 'Enter a Student ID or Email.', 'error');
+      const clubKey = currentAdmin.clubKey;
+      const members = getMembersFor(clubKey);
+      if(members.some(m => String(m.id).toLowerCase() === id.toLowerCase())){
+        return setMessage(memberMsg, 'A member with this ID already exists.', 'error');
+      }
+      members.push({ name, id });
+      saveMembersFor(clubKey, members);
+      setMessage(memberMsg, 'Member added.', 'success');
+      memberForm.reset();
+      renderMembers();
+    }
+
+    // =========================
+    // Student dashboard
+    // =========================
+    function openStudentDashboard(studentInfo){
+      currentStudent = studentInfo; // { username, name, clubKey, clubName }
+      sessionStorage.setItem(CURRENT_STUDENT_KEY, JSON.stringify(studentInfo));
+
+      loginPanel.classList.remove('active'); loginPanel.setAttribute('aria-hidden','true');
+      studentDashboard.classList.add('active'); studentDashboard.setAttribute('aria-hidden','false');
+
+      studentClubTitle.innerHTML = `<strong>Welcome to ${escapeHtml(studentInfo.clubName)}</strong>`;
+      studentNameEl.textContent = studentInfo.name;
+
+      renderStudentAnnouncements();
+      renderStudentEvents();
+      renderStudentMembers();
+    }
+
+    function studentLogout(){
+      sessionStorage.removeItem(CURRENT_STUDENT_KEY);
+      stopAnnouncementSlider();
+      backToChoices();
+    }
+
+    // Student: announcements slider (for their club)
+    function renderStudentAnnouncements(){
+      stopAnnouncementSlider();
+      const list = getAnnouncementsFor(currentStudent.clubKey).slice().sort((a,b)=> b.time - a.time);
+      announceSlides.innerHTML = '';
+      announceDots.innerHTML = '';
+      sliderIndex = 0;
+
+      if(list.length === 0){
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+        slide.innerHTML = `<p class="muted" style="margin:0;">No announcements yet.</p>`;
+        announceSlides.appendChild(slide);
+        return;
+      }
+
+      list.forEach((a, i)=>{
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+        const dt = new Date(a.time);
+        slide.innerHTML = `
+          <div class="item-top">
+            <strong>Announcement</strong>
+            <small class="muted">${dt.toLocaleString()}</small>
+          </div>
+          <p style="margin:8px 0 0; white-space:pre-wrap;">${escapeHtml(a.text)}</p>
+        `;
+        announceSlides.appendChild(slide);
+
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i===0 ? ' active':'');
+        dot.dataset.index = i;
+        dot.addEventListener('click', ()=> goToSlide(i));
+        announceDots.appendChild(dot);
+      });
+
+      startAnnouncementSlider();
+    }
+    function updateSliderTransform(){
+      announceSlides.style.transform = `translateX(-${sliderIndex * 100}%)`;
+      [...announceDots.children].forEach((d, i)=> d.classList.toggle('active', i === sliderIndex));
+    }
+    function nextSlide(){
+      const total = announceSlides.children.length;
+      sliderIndex = (sliderIndex + 1) % total;
+      updateSliderTransform();
+    }
+    function goToSlide(i){
+      sliderIndex = i;
+      updateSliderTransform();
+      stopAnnouncementSlider();
+      startAnnouncementSlider();
+    }
+    function startAnnouncementSlider(){
+      stopAnnouncementSlider();
+      if(announceSlides.children.length <= 1) return;
+      sliderTimer = setInterval(nextSlide, 4000);
+    }
+    function stopAnnouncementSlider(){
+      if(sliderTimer) clearInterval(sliderTimer);
+      sliderTimer = null;
+    }
+
+    // Student: event registration
+    function getMyRegistrations(){
+      try { return JSON.parse(localStorage.getItem(registrationKey(currentStudent.clubKey, currentStudent.username)) || '[]'); }
+      catch { return []; }
+    }
+    function saveMyRegistrations(arr){
+      localStorage.setItem(registrationKey(currentStudent.clubKey, currentStudent.username), JSON.stringify(arr));
+    }
+    function toggleRegistration(eventId){
+      const regs = getMyRegistrations();
+      const idx = regs.indexOf(eventId);
+      if(idx === -1) regs.push(eventId); else regs.splice(idx,1);
+      saveMyRegistrations(regs);
+      renderStudentEvents();
+    }
+
+    function renderStudentEvents(){
+      const events = getEventsFor(currentStudent.clubKey).slice().sort((a,b)=> new Date(b.dateTime) - new Date(a.dateTime));
+      studentEvents.innerHTML = '';
+      if(events.length === 0){
+        studentEvents.innerHTML = `<div class="card-small">No events yet.</div>`;
+        return;
+      }
+      const regs = new Set(getMyRegistrations());
+
+      events.forEach(ev=>{
+        const when = ev.dateTime ? new Date(ev.dateTime).toLocaleString() : '—';
+        const reg = regs.has(ev.id);
+        const item = document.createElement('div');
+        item.className = 'card-small';
+        item.innerHTML = `
+          <div class="item-top">
+            <strong>${escapeHtml(ev.title)}</strong>
+            <small class="muted">${when}</small>
+          </div>
+          <p class="muted" style="margin:6px 0 0;"><strong>Location:</strong> ${escapeHtml(ev.location || 'TBA')}</p>
+          ${ev.desc ? `<p style="margin:6px 0 0; white-space:pre-wrap;">${escapeHtml(ev.desc)}</p>` : ''}
+          <div class="item-actions" style="margin-top:10px;">
+            <button class="btn ${reg ? 'danger' : 'primary'} small" data-action="toggleReg" data-id="${ev.id}">
+              ${reg ? 'Unregister' : 'Register'}
+            </button>
+            ${reg ? '<span class="pill">Registered</span>' : ''}
+          </div>
+        `;
+        studentEvents.appendChild(item);
+      });
+
+      studentEvents.onclick = (e)=>{
+        const btn = e.target.closest('button[data-action="toggleReg"]');
+        if(!btn) return;
+        toggleRegistration(btn.dataset.id);
+      };
+    }
+
+    // Student: members list
+    function renderStudentMembers(){
+      const members = getMembersFor(currentStudent.clubKey);
+      studentMembers.innerHTML = '';
+      if(members.length === 0){
+        studentMembers.innerHTML = `<div class="card-small">No members yet.</div>`;
+        return;
+      }
+      members.forEach(m=>{
+        const item = document.createElement('div');
+        item.className = 'card-small';
+        item.innerHTML = `
+          <div class="item-top">
+            <strong>${escapeHtml(m.name)}</strong>
+            <small class="muted">${escapeHtml(m.id)}</small>
+          </div>
+        `;
+        studentMembers.appendChild(item);
+      });
+    }
+
+    // =========================
+    // Events — entry points
+    // =========================
+    adminBtn.addEventListener('click', ()=> showLogin('admin'));
+    studentBtn.addEventListener('click', ()=> showLogin('student'));
+    backBtn.addEventListener('click', backToChoices);
+
+    // Student tab switches
+    btnStudentSignIn.addEventListener('click', ()=> switchStudentMode('signin'));
+    btnStudentSignUp.addEventListener('click', ()=> switchStudentMode('signup'));
+
+    // Admin login
+    adminForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const userInput = (adminUser.value || '').trim();
+      const passInput = (adminPass.value || '').trim();
+      if(!userInput || !passInput) return setMessage(message, 'Please fill in both fields.', 'error');
+
+      const rec = findAdmin(userInput);
+      if(!rec) return setMessage(message, 'Admin not found. Use your email or admin name.', 'error');
+      if(rec.password !== passInput) return setMessage(message, 'Incorrect password.', 'error');
+
+      openAdminDashboard(rec);
+    });
+
+    // Admin dashboard interactions
+    btnDashAnnounce.addEventListener('click', ()=> switchDashboardView('announce'));
+    btnDashSecond.addEventListener('click', ()=> switchDashboardView('events'));
+    btnDashThird.addEventListener('click', ()=> switchDashboardView('members'));
+    logoutBtn.addEventListener('click', logoutAdmin);
+
+    // Admin: Announcement actions
+    announceForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      if(!currentAdmin) return;
+      const text = (announceText.value || '').trim();
+      if(!text) return setMessage(announceMsg, 'Please enter a message.', 'error');
+      const list = getAnnouncementsFor(currentAdmin.clubKey);
+      list.push({ text, time: Date.now(), by: currentAdmin.adminName, clubKey: currentAdmin.clubKey, clubName: currentAdmin.clubName });
+      saveAnnouncementsFor(currentAdmin.clubKey, list);
+      setMessage(announceMsg, 'Announcement posted.', 'success');
+      announceText.value = '';
+      renderAnnouncements();
+    });
+    clearAnnouncements.addEventListener('click', ()=>{
+      if(!currentAdmin) return;
+      if(confirm(`Clear all announcements for ${currentAdmin.clubName}?`)){
+        localStorage.removeItem(keyForClub('announcements', currentAdmin.clubKey));
+        renderAnnouncements();
+        clearMessage(announceMsg);
+      }
+    });
+
+    // Admin: Events actions
+    eventForm.addEventListener('submit', upsertEvent);
+    eventCancel.addEventListener('click', resetEventForm);
+    eventList.addEventListener('click', onEventListClick);
+
+    // Admin: Member actions
+    memberForm.addEventListener('submit', addMember);
+    memberList.addEventListener('click', onMemberListClick);
+
+    // =========================
+    // Student Sign up / Sign in
+    // =========================
+    studentSignUpForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = (stuNameUp.value || '').trim();
+      const user = keyFor(stuUserUp.value);
+      const pass = stuPassUp.value;
+      const confirm = stuConfirmUp.value;
+      const clubKey = stuClubUp.value;
+
+      if(name.length < 2) return setMessage(message, 'Please enter your full name (at least 2 characters).', 'error');
+      if(!user) return setMessage(message, 'Please enter your email or ID.', 'error');
+      if(pass.length < 6) return setMessage(message, 'Password must be at least 6 characters.', 'error');
+      if(pass !== confirm) return setMessage(message, 'Passwords do not match.', 'error');
+      if(!clubKey) return setMessage(message, 'Please select a club to join.', 'error');
+      if(!stuTerms.checked) return setMessage(message, 'Please agree to the terms to continue.', 'error');
+
+      const db = getStudentUsers();
+      if(db[user]) return setMessage(message, 'An account with this email/ID already exists. Try signing in.', 'error');
+
+      // Save account
+      db[user] = { name: toTitleCase(name), pw: pass, clubKey, createdAt: Date.now() };
+      saveStudentUsers(db);
+
+      // Add to club member list
+      const members = getMembersFor(clubKey);
+      const newId = genMemberId(clubKey);
+      members.push({ id: newId, name: toTitleCase(name) });
+      saveMembersFor(clubKey, members);
+
+      alert('Account is created');
+
+      // Auto sign in
+      switchStudentMode('signin');
+      stuUserIn.value = user;
+      stuPassIn.value = pass;
+      setTimeout(()=> studentSignIn(user, pass, { auto: true }), 200);
+    });
+
+    studentSignInForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const user = keyFor(stuUserIn.value);
+      const pass = stuPassIn.value;
+      studentSignIn(user, pass);
+    });
+
+    function studentSignIn(user, pass, opts={}){
+      if(!user || !pass){
+        if(!opts.auto) setMessage(message, 'Please fill in both fields.', 'error');
+        return;
+      }
+      const db = getStudentUsers();
+      const rec = db[user];
+      if(!rec){ if(!opts.auto) setMessage(message, 'No account found. Try Sign up.', 'error'); return; }
+      if(rec.pw !== pass){ if(!opts.auto) setMessage(message, 'Incorrect password. Please try again.', 'error'); return; }
+
+      const club = CLUBS.find(c => c.key === rec.clubKey);
+      const info = { username: user, name: rec.name, clubKey: rec.clubKey, clubName: club?.name || rec.clubKey };
+      setMessage(message, `Welcome, ${info.name}!`, 'success');
+      setTimeout(()=> openStudentDashboard(info), 200);
+    }
+
+    // Footer year
+    year.textContent = new Date().getFullYear();
+
+    // Default to Sign in tab on student open
+    // (You can change to 'signup' if preferred)
+  </script>
+</body>
+</html>
